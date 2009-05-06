@@ -529,8 +529,6 @@ int
 main(int argc, char **argv)
 {
 	gint i;
-	sLrcLine *line;
-
 
 	gtk_init (&argc, &argv);
 

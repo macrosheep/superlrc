@@ -229,7 +229,6 @@ _download_lyric(sLrcPlugin* lrcPlug)
 	int iCount = 30;
 	while (iCount--)
 	{
-//		LDEBUG("正在下载歌词(%d)", iCount);
 		pid_t pr = waitpid(child, &iState, WNOHANG);
 		if (pr> 0)
 		break;
