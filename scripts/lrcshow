@@ -1,0 +1,93 @@
+#!/bin/bash
+# Name:	 lrcshow
+# License:  GPLv3
+# Credit:   Yang Hongyang
+# Encoding: UTF-8
+# Thanks to: lrcdis xiooli,solcomo,bones7456,oldherl 
+
+#是否开启调试信息
+Debug=1
+
+#显示模式： osd, notify, fifo (将歌词输出到一个管道文件，以便用其他命令访问)
+Dismode=osd
+
+#==============[osd, notify & kdialog]=============
+#osd显示时的参数
+#osd显示位置：top, bottom
+Vposition=top
+#osd对齐位置：left, right, center
+Halignment=center
+#osd最长显示时间（超过则隐藏,单位毫秒？）
+Timeout=10000
+#span size
+Size=20000
+#字体颜色： green, white, blue, yellow, grey...
+#注意，这个颜色与cli模式的颜色不是一回事
+Foreground=green
+#动画效果： off, on
+Animations=off
+#是否加新行，以免挡住panel等: off, on
+Addnewline=off
+#notify模式的图标文件名(只支持绝对路径)
+NotifyIcon=""
+#kdialog显示的timeout
+Ktimeout="5"
+
+#======================END========================
+
+DIS_WORDS() {
+	#以各种预设的模式显示文字
+
+	#两个参数; $1:T标题W普通歌词E错误信息  正确执行按照Dismode将 $2 格式化输出
+
+	local line i j nl
+
+	line="$2"
+	nl="\n "
+	#[ "$2" = "" ] && exit
+
+	if [ "$Dismode" = "osd" -a "`which gnome-osd-client 2>/dev/null`" ];then
+		[ "$1" = T ] && line="****** $line ******"
+		[ "$1" = E ] && line="错误: $line"
+		if [ "$Addnewline" = "on" ];then
+			if [ "$Vposition" = "top" ];then
+				line="$nl$line"
+			else
+				line="$line$nl"
+			fi
+		fi
+		#NOTE: 下面的echo是需要的，不然\n会直接显示出来。
+#		gnome-osd-client -f "<message id='lrcdis' osd_fake_translucent_bg='off' osd_vposition='$Vposition' osd_halignment='$Halignment' animations='$Animations' hide_timeout='$Timeout'><span size='$Size' foreground='$Foreground'>`echo -ne "$line"`</span></message>"
+		gnome-osd-client -f "<message id='lrcshow'><span size='$Size' foreground='$Foreground'>$line</span></message>"
+	elif [ "$Dismode" = "fifo" -a -p "/dev/shm/lrcfifo" ];then
+		[ "$1" = T ] && line="****** $line ******"
+		[ "$1" = E ] && line="错误: $line"
+		#cat < /dev/shm/lrcfifo & # there's no need to empty the fifo file anymore.
+		echo -ne "$line" > /dev/shm/lrcfifo
+	elif [ "$Dismode" = "notify" -a "`which notify-send 2>/dev/null`" ];then
+		[ "$2" = "" ] && return
+		[ "$1" = T ] && line="****** $line ******"
+		[ "$1" = E ] && line="错误: $line"
+		if [ -n "$NotifyIcon" ];then
+			notify-send -c lrcshow -i "$NotifyIcon" -t "$Timeout" -- "$line"
+		else
+			notify-send -c lrcshow -t "$Timeout" -- "$line"
+		fi
+	elif [ "$Dismode" = "title" ];then
+		[ "$1" = T ] && line="****** $line ******"
+		[ "$1" = E ] && line="错误: $line"
+		echo -ne "\e]0;$line\a"
+	elif [ "$Dismode" = "kdialog" ];then
+		[ "$1" = T ] && line="****** $line ******"
+		[ "$1" = E ] && line="错误: $line"
+		kdialog --passivepopup "$line" "${Ktimeout:-5}" 2>/dev/null
+
+	else
+		[ "$1" = T ] && line="****** $line ******"
+		[ "$1" = E ] && line="错误: $line"
+		echo "$line"
+	fi
+}
+
+
+DIS_WORDS "$1" "$2"

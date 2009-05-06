@@ -1,0 +1,138 @@
+#!/bin/bash
+# Name:	 downloadlrc
+# License:  GPLv3
+# Credit:   Yang Hongyang  (2008-2009)
+# Encoding: UTF-8
+# Thanks to: lrcdis xiooli,solcomo,bones7456,oldherl 
+
+# 5.5日修改，使用baidu歌词搜索
+# usage ./lrcdownload PATH NAME (OPTION) (NUM)
+# ./lrcdownload PATH NAME //下载第一个
+# ./lrcdownload PATH NAME n //得到搜索到的歌词文件的个数
+# ./lrcdownload PATH NAME 2 //得到搜索到的第二个歌词文件的信息,最多可以得到5个
+# ./lrcdownload PATH NAME d 3 //下载搜索到的第三个歌词文件，最多5个
+
+Debug=0
+
+BAIDU_URI(){
+	#得到百度歌词文件的下载URL
+
+	# 1 argument: gb
+	local htm
+	htm="`wget "http://mp3.baidu.com/m?f=ms&tn=baidump3lyric&ct=150994944&lf=2&rn=10&word="$1"&lm=-1" -q -T 10 -O- 2>/dev/null | iconv -f gbk`"
+	[ "$Debug" = 1 ] && echo "HTM $htm" > /tmp/baidu.htm
+#	echo "$htm" | grep -F .lrc | cut -d' ' -f3 | cut '-d"' -f2 | head -n 1
+
+	if [ "$2" ];then
+		case "$2" in
+			n)
+				echo "$htm"| grep -Fim5 "LRC歌词来自"| wc -l
+				exit 0;;
+			*)
+				echo "$htm"| grep -Fim5 "LRC歌词来自"|awk -F\\\" '{print $4}' | awk 'NR=='$2''
+				exit 0;;
+		esac
+	fi
+	echo "$htm" | grep -Fim1 "LRC歌词来自"|awk -F\\\" '{print $4}'
+}
+SOGOU_URI(){
+	#得到搜狗歌词文件的下载URL
+
+	# 1 argument: gb
+	local htm a
+	htm="`wget "http://mp3.sogou.com/gecisearch.so?query="$1"" -q -T 10 -O- 2>/dev/null | iconv -f gbk`"
+	[ "$Debug" = 1 ] && echo "HTM $htm" > /tmp/htm
+	a="`echo "$htm" | grep -Fim1 "downlrc"|awk -F\\\" '{print $2}'`"
+	[ "$Debug" = 1 ] && echo "A $a" >&2
+	[ "$a" = "" ]|| echo -n 'http://mp3.sogou.com/'"$a"
+}
+
+DOWNLRC(){
+	#下载歌词的函数
+
+	#参数三个，$1 (dir) $2 (str)： 歌曲名字; 没有返回值，正确执行会下载一个 lrc 文件至 Lrcdir $3
+	local nm lrcdir link full_link gb file
+
+	lrcdir="$1"	
+	nm="$2"
+	[ ! -d "$lrcdir" ] || mkdir -p "$lrcdir"
+	file="$lrcdir/$nm.lrc"
+	
+	if [ -f "$file" ];then
+		rm -rf "$file"
+	fi
+
+	[ "$Debug" = 1 ] && echo "file: $file" >&2
+	#将歌曲名字转换为urlencode，utf-8的locale必须先转换为gbk的编码
+  	gb="$(echo -n "$nm" | iconv -c -t gbk | od -t x1 -A n -w1000|tr " " "%")"
+
+	#从baidu搜索里面找出当前歌曲的歌词下载页
+	#FIXME: just for a try
+	if [ "$3" ];then
+
+  	link="`BAIDU_URI "$gb" "$3"`"
+	[ "$Debug" = 1 ] && echo "Link: $link" >&2
+  	while [ "$link" ] && [ ! -s "$file" ];do
+		wget "$link" -T 5 -t 2 -q -O -|iconv -f gbk -c | tr -d "\r" > "$file"
+		{ echo '<xml>'; cat "$file"; echo '</xml>';} > /tmp/lrcdisTMP.xml
+		xmllint /tmp/lrcdisTMP.xml --encode UTF-8 2>/dev/null > /tmp/lrcdisTMP.lrc && {
+			cat /tmp/lrcdisTMP.lrc | head -n -1 | tail -n +3 > "$file"
+		}
+		rm /tmp/lrcdisTMP* &>/dev/null
+	done
+
+	else
+
+  	link="`BAIDU_URI "$gb"`"
+	[ "$Debug" = 1 ] && echo "Link: $link" >&2
+  	while [ "$link" ] && [ ! -s "$file" ];do
+		wget "$link" -T 5 -t 2 -q -O -|iconv -f gbk -c | tr -d "\r" > "$file"
+		{ echo '<xml>'; cat "$file"; echo '</xml>';} > /tmp/lrcdisTMP.xml
+		xmllint /tmp/lrcdisTMP.xml --encode UTF-8 2>/dev/null > /tmp/lrcdisTMP.lrc && {
+			cat /tmp/lrcdisTMP.lrc | head -n -1 | tail -n +3 > "$file"
+		}
+		rm /tmp/lrcdisTMP* &>/dev/null
+	done
+
+	fi
+}
+
+if [ "$3" ];then
+	case "$3" in
+		n) 
+  			gb="$(echo -n "$2" | iconv -c -t gbk | od -t x1 -A n -w1000|tr " " "%")"
+			n="`BAIDU_URI "$gb" "$3"`"
+			echo $n
+			exit 0;;
+		d)
+			if [ "$4" ];then
+			DOWNLRC "$1" "$2" "$4"
+				if [ -f "$1/$2.lrc" ];then
+					echo "歌词文件 $1/$2.lrc 已保存。"
+				else
+					echo "$2 的歌词文件下载失败：（"
+				fi
+			else
+				echo "未输入歌曲名！"
+			fi
+			exit 0;;
+		*) 
+  			gb="$(echo -n "$2" | iconv -c -t gbk | od -t x1 -A n -w1000|tr " " "%")"
+			link="`BAIDU_URI "$gb" "$3"`"
+			if [ "$link" ];then
+				wget "$link" -T 5 -t 2 -q -O -|iconv -f gbk -c | tr -d "\r" | awk 'NR < 5'
+			fi
+			exit 0;;
+	esac
+fi
+
+if [ "$1""$2" ];then
+	DOWNLRC "$1" "$2"
+	if [ -f "$1/$2.lrc" ];then
+		echo "歌词文件 $1/$2.lrc 已保存。"
+	else
+		echo "$2 的歌词文件下载失败：（"
+	fi
+else
+	echo "未输入歌曲名！"
+fi
