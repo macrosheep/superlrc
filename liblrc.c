@@ -186,11 +186,15 @@ lget_music_state(sLrcPlugin* lrcPlug)
 			g_free(lrcPlug->currsongpath);
 			lrcPlug->currsong = currsong;
 			lrcPlug->currsongpath = songpath;
+			goto otherinfo;
 		}
+		g_free(currsong);
+		g_free(songpath);
 	} else {
 		lrcPlug->currsong = currsong;
 		lrcPlug->currsongpath = songpath;
 	}
+otherinfo:
 	lrcPlug->totaltime = player.player_get_totaltime();
 	lrcPlug->lastplaytime = lrcPlug->currplaytime;
 	lrcPlug->currplaytime = player.player_get_currplaytime();
