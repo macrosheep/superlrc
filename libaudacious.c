@@ -60,6 +60,7 @@ audacious_get_currsong(gchar** name,gchar** path)
 	} else {
 		g_free(fullname);
 		g_strfreev(tmp);
+		pclose(stream);
 		return FALSE;
 	}
 	g_free(fullname);
