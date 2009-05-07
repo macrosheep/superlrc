@@ -19,7 +19,7 @@ BAIDU_URI(){
 
 	# 1 argument: gb
 	local htm
-	htm="`wget "http://mp3.baidu.com/m?f=ms&tn=baidump3lyric&ct=150994944&lf=2&rn=10&word="$1"&lm=-1" -q -T 10 -O- 2>/dev/null | iconv -f gbk`"
+	htm="`wget "http://mp3.baidu.com/m?f=ms&tn=baidump3lyric&ct=150994944&lf=2&rn=10&word="$1"&lm=-1" -q -T 10 -O- 2>/dev/null | iconv -f gbk 2>/dev/null`"
 	[ "$Debug" = 1 ] && echo "HTM $htm" > /tmp/baidu.htm
 #	echo "$htm" | grep -F .lrc | cut -d' ' -f3 | cut '-d"' -f2 | head -n 1
 
@@ -97,12 +97,17 @@ DOWNLRC(){
 	fi
 }
 
+
 if [ "$3" ];then
 	case "$3" in
 		n) 
   			gb="$(echo -n "$2" | iconv -c -t gbk | od -t x1 -A n -w1000|tr " " "%")"
 			n="`BAIDU_URI "$gb" "$3"`"
-			echo $n
+			if [ $n -lt 6 ];then
+				echo $n
+			else
+				echo "5"
+			fi
 			exit 0;;
 		d)
 			if [ "$4" ];then

@@ -35,11 +35,16 @@ typedef struct slrcplugin{
 	gint totaltime;
 	gint currplaytime;
 	gint lastplaytime;
+
 	gboolean (*init_lyrcs)(gchar *filename, sLrcInfo* lrcinfo);
 	gboolean (*get_curr_lrcname)(struct slrcplugin* lrcPlug);
 	gboolean (*get_player_state)(struct slrcplugin* lrcPlug);
 	gboolean (*get_music_state)(struct slrcplugin* lrcPlug);
 	gboolean (*set_play_time)(gint time);
+	//used for redownload lrcs
+	gboolean (*get_avalible_lrc_num)(struct slrcplugin* lrcPlug,gint* num);
+	gboolean (*get_avalible_lrc_info)(struct slrcplugin* lrcPlug, gchar** title, gchar** artist, gchar** album, gint index);
+	gboolean (*get_lrc_by_index)(struct slrcplugin* lrcPlug,gint index);
 } sLrcPlugin;
 
 #endif

@@ -7,6 +7,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define CAL_TIME(a,b,c,d) ((g_ascii_digit_value(a)*10+g_ascii_digit_value(b))*60+ \
 				g_ascii_digit_value(c)*10 + g_ascii_digit_value(d))
@@ -123,6 +124,12 @@ do_strhandle:
 			}
 			g_strfreev(split);
 		}
+	}
+
+	if (lrcinfo->length == 0) {
+		g_ptr_array_free(lrcinfo->lyrcs,FALSE);
+		lrcinfo->lyrcs = NULL;
+		return FALSE;
 	}
 	
 	g_ptr_array_sort(lrcinfo->lyrcs,(GCompareFunc)_compare_time);
@@ -269,4 +276,83 @@ lget_curr_lrcname(sLrcPlugin* lrcPlug)
 	g_free(buf);
 
 	return TRUE;
+}
+
+gboolean
+lget_avalible_lrc_num(struct slrcplugin* lrcPlug,gint* num)
+{
+	FILE *stream;
+	gchar buf[5],*cmd;
+	gint i;
+
+	for (i=0;i<5;i++) {
+		buf[i] = '\0';
+	}
+
+	cmd = g_strdup_printf("%s %s %s %s","./scripts/lrcdownload",lrcPlug->currsongpath,lrcPlug->currsong,"n");
+	stream = popen(cmd,"r");
+	g_free(cmd);
+	fread(buf, sizeof(gchar),sizeof(buf),stream);
+
+	if (strlen(buf) > 2) {
+		pclose(stream);
+		return FALSE;
+	}
+//to do judge g_isdit();
+	*num = g_ascii_digit_value(buf[0]);
+
+	pclose(stream);
+	return TRUE;
+}
+
+gboolean
+lget_avalible_lrc_info(struct slrcplugin* lrcPlug, gchar** title, gchar** artist, gchar** album, gint index)
+{
+	FILE *stream;
+	gchar buf[100],*cmd,**info,**temp,**tmp,*str;
+	gint i;
+
+	for (i=0;i<100;i++) {
+		buf[i] = '\0';
+	}
+
+	cmd = g_strdup_printf("%s %s %s %d","./scripts/lrcdownload",lrcPlug->currsongpath,lrcPlug->currsong,index);
+	stream = popen(cmd,"r");
+	g_free(cmd);
+	fread(buf, sizeof(gchar),sizeof(buf),stream);
+
+//	LDEBUG("buf: %s\n",buf);
+	info = g_strsplit_set(buf, "\r\n", 6); //first time split
+/*	if (g_strv_length(info) == 1) {
+		g_strfreev(info);
+		return FALSE;
+	}
+*/
+	temp = info;
+	while (*temp != NULL) {
+		str = *temp;
+//		LDEBUG("str: %s\n",str);
+		if (str[0] == '[') {
+			tmp = g_strsplit_set(str,"[:]",4); //second split
+			if (!g_strcmp0(tmp[1],"ti"))
+				*title = g_strdup(tmp[2]);
+			else if (!g_strcmp0(tmp[1],"ar"))
+				*artist = g_strdup(tmp[2]);
+			else if (!g_strcmp0(tmp[1],"al"))
+				*album = g_strdup(tmp[2]);
+			g_strfreev(tmp);
+		}
+		temp++;
+	}
+	g_strfreev(info);
+	pclose(stream);
+
+	if (*title == NULL && *artist == NULL && *album == NULL)
+		return FALSE;
+	return TRUE;
+}
+
+gboolean
+lget_lrc_by_index(struct slrcplugin* lrcPlug,gint index)
+{
 }

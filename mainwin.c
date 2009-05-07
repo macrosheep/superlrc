@@ -50,6 +50,10 @@ lrcplugin_init()
 	lrcPlug.get_music_state = lget_music_state;
 	lrcPlug.set_play_time = lset_play_time;
 
+	lrcPlug.get_avalible_lrc_num = lget_avalible_lrc_num;
+	lrcPlug.get_avalible_lrc_info = lget_avalible_lrc_info;
+	lrcPlug.get_lrc_by_index = lget_lrc_by_index;
+
 	return TRUE;
 }
 
@@ -225,6 +229,7 @@ time_to_pixel(void)
 		}
 	}
 	if (n == 0) {
+		line = g_ptr_array_index(lrcPlug.lrc->lyrcs,0);
 		set_curr_label_color(n);
 		return n*labelheight + lrcPlug.currplaytime \
 			*labelheight/line->time;

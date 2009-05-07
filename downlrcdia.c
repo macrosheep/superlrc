@@ -9,6 +9,21 @@ downlrcdia_quit(GtkWidget* downwnd, GdkEvent *event, gpointer data)
 gboolean
 redownload_lrc_dia(sLrcPlugin *lrcPlug)
 {
+	gint num,i;
+	gchar *title = NULL;
+	gchar *artist = NULL;
+	gchar *album = NULL;
+
+	lrcPlug->get_avalible_lrc_num(lrcPlug,&num);
+
+	LDEBUG("%s %d\n",lrcPlug->currsong,num);
+
+	for (i = 1;i<= num;i++) {
+		if (lrcPlug->get_avalible_lrc_info(lrcPlug,&title,&artist,&album,i))
+			LDEBUG("%s %s %s\n",title,artist,album);
+	}
+
+//	lrcPlug->get_lrc_by_index(lrcPlug,num);
 	GtkWidget *downwnd = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	GtkWidget *label = gtk_label_new("testtttttttttttttttttttttttttttttt");
 
