@@ -528,8 +528,6 @@ creat_window()
 int
 main(int argc, char **argv)
 {
-	gint i;
-
 	gtk_init (&argc, &argv);
 
 	if (!lrcplugin_init()) {
