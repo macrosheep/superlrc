@@ -14,6 +14,8 @@
 
 Debug=0
 
+SERVER=BAIDU
+
 BAIDU_URI(){
 	#得到百度歌词文件的下载URL
 
@@ -42,6 +44,18 @@ SOGOU_URI(){
 	local htm a
 	htm="`wget "http://mp3.sogou.com/gecisearch.so?query="$1"" -q -T 10 -O- 2>/dev/null | iconv -f gbk`"
 	[ "$Debug" = 1 ] && echo "HTM $htm" > /tmp/htm
+	if [ "$2" ];then
+		case "$2" in
+			n)
+				echo "$htm"| grep -Fim5 "downlrc"| wc -l
+				exit 0;;
+			*)
+				a="`echo "$htm"| grep -Fim5 "downlrc"|awk -F\\\" '{print $2}' | awk 'NR=='$2''`"
+				[ "$Debug" = 1 ] && echo "A $a" >&2
+				[ "$a" = "" ]|| echo -n 'http://mp3.sogou.com/'"$a"
+				exit 0;;
+		esac
+	fi
 	a="`echo "$htm" | grep -Fim1 "downlrc"|awk -F\\\" '{print $2}'`"
 	[ "$Debug" = 1 ] && echo "A $a" >&2
 	[ "$a" = "" ]|| echo -n 'http://mp3.sogou.com/'"$a"
@@ -70,7 +84,7 @@ DOWNLRC(){
 	#FIXME: just for a try
 	if [ "$3" ];then
 
-  	link="`BAIDU_URI "$gb" "$3"`"
+  	link="`"$SERVER"_URI "$gb" "$3"`"
 	[ "$Debug" = 1 ] && echo "Link: $link" >&2
   	while [ "$link" ] && [ ! -s "$file" ];do
 		wget "$link" -T 5 -t 2 -q -O -|iconv -f gbk -c | tr -d "\r" > "$file"
@@ -83,7 +97,7 @@ DOWNLRC(){
 
 	else
 
-  	link="`BAIDU_URI "$gb"`"
+  	link="`"$SERVER"_URI "$gb"`"
 	[ "$Debug" = 1 ] && echo "Link: $link" >&2
   	while [ "$link" ] && [ ! -s "$file" ];do
 		wget "$link" -T 5 -t 2 -q -O -|iconv -f gbk -c | tr -d "\r" > "$file"
@@ -102,7 +116,7 @@ if [ "$3" ];then
 	case "$3" in
 		n) 
   			gb="$(echo -n "$2" | iconv -c -t gbk | od -t x1 -A n -w1000|tr " " "%")"
-			n="`BAIDU_URI "$gb" "$3"`"
+			n="`"$SERVER"_URI "$gb" "$3"`"
 			if [ $n -lt 6 ];then
 				echo $n
 			else
@@ -123,7 +137,7 @@ if [ "$3" ];then
 			exit 0;;
 		*) 
   			gb="$(echo -n "$2" | iconv -c -t gbk | od -t x1 -A n -w1000|tr " " "%")"
-			link="`BAIDU_URI "$gb" "$3"`"
+			link="`"$SERVER"_URI "$gb" "$3"`"
 			if [ "$link" ];then
 				wget "$link" -T 5 -t 2 -q -O -|iconv -f gbk -c | tr -d "\r" | awk 'NR < 5'
 			fi

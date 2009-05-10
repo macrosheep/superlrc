@@ -37,6 +37,7 @@ lrcplugin_init()
 	}
 	lrcPlug.playerstate = STOPPED;
 	lrcPlug.songchanged = TRUE;
+	lrcPlug.lrcredowned = FALSE;
 	lrcPlug.currsong = NULL;
 	lrcPlug.currsongpath = NULL;
 	lrcPlug.currlrcname = NULL;
@@ -434,7 +435,7 @@ smart_control()
 	lrcPlug.get_music_state(&lrcPlug);
 //	LDEBUG("%s\n",lrcPlug.currsong);
 //	LDEBUG("%s\n",lrcPlug.currsongpath);
-	if (lrcPlug.songchanged) {
+	if (lrcPlug.songchanged || lrcPlug.lrcredowned) {
 		if (!lrcPlug.get_curr_lrcname(&lrcPlug)) {
 			LDEBUG("no lrc found!\n");
 			return TRUE;
@@ -445,7 +446,10 @@ smart_control()
 			LDEBUG("no lrc found!\n");
 			return TRUE;
 		}
-		lrcPlug.songchanged = 0;
+		if (lrcPlug.songchanged)
+			lrcPlug.songchanged = FALSE;
+		if (lrcPlug.lrcredowned)
+			lrcPlug.lrcredowned = FALSE;
 	}
 
 	if (isminimized) {

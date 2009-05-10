@@ -8,6 +8,26 @@ enum {
 	N_COLUMNS,
 };
 
+gint
+double_click_handler(GtkWidget *list, GdkEventButton *event, gpointer lrcPlug)
+{
+	GtkTreeSelection *select;
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	gint index;
+
+	if (event->type==GDK_2BUTTON_PRESS) {
+		select = gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
+		if (gtk_tree_selection_get_selected (select,&model,&iter)) {
+			gtk_tree_model_get (model,&iter,INDEX_COLUMN,&index,-1);
+			((sLrcPlugin *)lrcPlug)->get_lrc_by_index((sLrcPlugin *)lrcPlug,index);
+			((sLrcPlugin *)lrcPlug)->lrcredowned = TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
 gboolean
 downlrcdia_quit(GtkWidget* downwnd, GdkEvent *event, gpointer data)
 {
@@ -33,7 +53,7 @@ redownload_lrc_dia(sLrcPlugin *lrcPlug)
 	store = gtk_list_store_new(N_COLUMNS,G_TYPE_INT,G_TYPE_STRING,\
 					G_TYPE_STRING,G_TYPE_STRING);
 
-	gtk_list_store_append(store, &iter);
+//	gtk_list_store_append(store, &iter);
 
 	list = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	g_object_unref (G_OBJECT (store));
@@ -55,15 +75,21 @@ redownload_lrc_dia(sLrcPlugin *lrcPlug)
 
 	gtk_signal_connect(GTK_OBJECT(downwnd),"delete-event",\
 				GTK_SIGNAL_FUNC(downlrcdia_quit),NULL);
+
+	gtk_signal_connect(GTK_OBJECT(list),
+			"button_press_event",
+			GTK_SIGNAL_FUNC(double_click_handler),
+			lrcPlug);
+
 	gtk_widget_show_all(downwnd);
 
 	lrcPlug->get_avalible_lrc_num(lrcPlug,&num);
 
-	LDEBUG("%s %d\n",lrcPlug->currsong,num);
+//	LDEBUG("%s %d\n",lrcPlug->currsong,num);
 
 	for (i = 1;i<= num;i++) {
 		if (lrcPlug->get_avalible_lrc_info(lrcPlug,&title,&artist,&album,i)) {
-			LDEBUG("%s %s %s\n",title,artist,album);
+//			LDEBUG("%s %s %s\n",title,artist,album);
 			gtk_list_store_insert_with_values (store, &iter,i-1,
 				INDEX_COLUMN, i,
 				TITLE_COLUMN, title,
@@ -72,7 +98,6 @@ redownload_lrc_dia(sLrcPlugin *lrcPlug)
 				-1);
 		}
 	}
-
 //	lrcPlug->get_lrc_by_index(lrcPlug,num);
 
 	return TRUE;

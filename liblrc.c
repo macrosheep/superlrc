@@ -289,6 +289,11 @@ lget_avalible_lrc_num(struct slrcplugin* lrcPlug,gint* num)
 	gchar buf[5],*cmd;
 	gint i;
 
+	if (!lrcPlug->currsong) {
+		*num = 0;
+		return FALSE;
+	}
+
 	for (i=0;i<5;i++) {
 		buf[i] = '\0';
 	}

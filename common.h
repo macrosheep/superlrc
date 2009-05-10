@@ -29,6 +29,7 @@ typedef struct slrcplugin{
 	sLrcInfo* lrc;
 	PlayerStateEnum playerstate;
 	gboolean songchanged;
+	gboolean lrcredowned;
 	gchar* currsong;
 	gchar* currsongpath;
 	gchar* currlrcname;
