@@ -231,8 +231,12 @@ _download_lyric(sLrcPlugin* lrcPlug)
 	}
 	else if (child == 0)
 	{
-		execl("./scripts/lrcdownload", "lrcdownload", lrcPlug->currsongpath, \
-			lrcPlug->currsong, (char * )0);
+		char *arg1,*arg2;
+		arg1 = g_strdup_printf("%s",lrcPlug->currsongpath);
+		arg2 = g_strdup_printf("%s",lrcPlug->currsong);
+		execl("./scripts/lrcdownload", "lrcdownload", arg1,arg2, (char * )0);
+		g_free(arg1);
+		g_free(arg2);
 		exit(0);
 	}
 	LDEBUG("正在下载歌词......\n");
@@ -289,7 +293,7 @@ lget_avalible_lrc_num(struct slrcplugin* lrcPlug,gint* num)
 		buf[i] = '\0';
 	}
 
-	cmd = g_strdup_printf("%s %s %s %s","./scripts/lrcdownload",lrcPlug->currsongpath,lrcPlug->currsong,"n");
+	cmd = g_strdup_printf("%s \"%s\" \"%s\" %s","./scripts/lrcdownload",lrcPlug->currsongpath,lrcPlug->currsong,"n");
 	stream = popen(cmd,"r");
 	g_free(cmd);
 	fread(buf, sizeof(gchar),sizeof(buf),stream);
@@ -316,7 +320,7 @@ lget_avalible_lrc_info(struct slrcplugin* lrcPlug, gchar** title, gchar** artist
 		buf[i] = '\0';
 	}
 
-	cmd = g_strdup_printf("%s %s %s %d","./scripts/lrcdownload",lrcPlug->currsongpath,lrcPlug->currsong,index);
+	cmd = g_strdup_printf("%s \"%s\" \"%s\" %d","./scripts/lrcdownload",lrcPlug->currsongpath,lrcPlug->currsong,index);
 	stream = popen(cmd,"r");
 	g_free(cmd);
 	fread(buf, sizeof(gchar),sizeof(buf),stream);
@@ -355,4 +359,10 @@ lget_avalible_lrc_info(struct slrcplugin* lrcPlug, gchar** title, gchar** artist
 gboolean
 lget_lrc_by_index(struct slrcplugin* lrcPlug,gint index)
 {
+	gchar *cmd;
+	cmd = g_strdup_printf("%s \"%s\" \"%s\" %s %d","./scripts/lrcdownload",lrcPlug->currsongpath,lrcPlug->currsong,"d",index);
+	system(cmd);
+	g_free(cmd);
+
+	return TRUE;
 }
