@@ -413,22 +413,18 @@ smart_control()
 	if (isgrab) return TRUE;
 
 	lrcPlug.get_player_state(&lrcPlug);
-		//	LDEBUG("%d\n",lrcPlug.playerstate);
 	switch (lrcPlug.playerstate) {
 		case PLAYING:
-//			LDEBUG("playing!\n");
 			break;
 		case PAUSED:
-//			LDEBUG("pauseed!\n");
 			return TRUE;
 			break;
 		case STOPPED:
 			player_stoped();
-//			LDEBUG("stopped!\n");
 			return TRUE;
 			break;
 		default:
-//			LDEBUG("default!\n");
+			return TRUE;
 			break;
 	}
 
@@ -436,16 +432,11 @@ smart_control()
 //	LDEBUG("%s\n",lrcPlug.currsong);
 //	LDEBUG("%s\n",lrcPlug.currsongpath);
 	if (lrcPlug.songchanged || lrcPlug.lrcredowned) {
-		if (!lrcPlug.get_curr_lrcname(&lrcPlug)) {
-			LDEBUG("no lrc found!\n");
-			return TRUE;
-		}
+		lrcPlug.get_curr_lrcname(&lrcPlug);
 		lrcPlug.init_lyrcs(lrcPlug.currlrcname,lrcPlug.lrc);
 		LDEBUG("%s\n",lrcPlug.currlrcname);
-		if (!creat_lrc_layout()) {
-			LDEBUG("no lrc found!\n");
-			return TRUE;
-		}
+		creat_lrc_layout();
+
 		if (lrcPlug.songchanged)
 			lrcPlug.songchanged = FALSE;
 		if (lrcPlug.lrcredowned)
