@@ -284,7 +284,7 @@ get_line(void)
 void
 player_stoped()
 {
-	set_curr_label_color(0);
+//	set_curr_label_color(0);
 	scroll_layout(0);
 }
 

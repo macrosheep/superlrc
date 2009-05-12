@@ -39,10 +39,10 @@ gboolean
 rhythmbox_get_currsong(gchar** name,gchar** path)
 {
 	FILE *stream;
-	gchar buf[250],**tmp,*fullname;
+	gchar buf[400],**tmp,*fullname;
 	gint i;
 //to do: set 0?another method
-	for (i=0;i<250;i++) {
+	for (i=0;i<400;i++) {
 		buf[i] = '\0';
 	}
 	stream = popen("dbus-send --session --print-reply --dest=org.gnome.Rhythmbox /org/gnome/Rhythmbox/Player org.gnome.Rhythmbox.Player.getPlayingUri 2>/dev/null|tail -n 1|awk '{print $2}'","r");

@@ -166,8 +166,10 @@ gboolean
 lget_player_state(sLrcPlugin* lrcPlug)
 {
 	if (!player.init(&player)) {
-		if (!_init_player())
+		if (!_init_player()) {
+			lrcPlug->playerstate = STOPPED;
 			return FALSE;
+		}
 	}
 
 	lrcPlug->playerstate = player.player_get_state();
@@ -321,10 +323,10 @@ gboolean
 lget_avalible_lrc_info(struct slrcplugin* lrcPlug, gchar** title, gchar** artist, gchar** album, gint index)
 {
 	FILE *stream;
-	gchar buf[300],*cmd,**info,**temp,**tmp,*str;
+	gchar buf[400],*cmd,**info,**temp,**tmp,*str;
 	gint i;
 
-	for (i=0;i<300;i++) {
+	for (i=0;i<400;i++) {
 		buf[i] = '\0';
 	}
 

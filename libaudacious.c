@@ -38,10 +38,10 @@ gboolean
 audacious_get_currsong(gchar** name,gchar** path)
 {
 	FILE *stream;
-	gchar buf[250],**tmp,*fullname;
+	gchar buf[400],**tmp,*fullname;
 	gint i;
 //to do: set 0?another method
-	for (i=0;i<250;i++) {
+	for (i=0;i<400;i++) {
 		buf[i] = '\0';
 	}
 	stream = popen("audtool --current-song-filename","r");	
