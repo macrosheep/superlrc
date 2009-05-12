@@ -49,7 +49,7 @@ redownload_lrc_dia(sLrcPlugin *lrcPlug)
 	GtkWidget *downwnd ;
 
 	downwnd = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-	gtk_widget_set_size_request(downwnd,-1,250);
+	gtk_widget_set_size_request(downwnd,-1,200);
 	store = gtk_list_store_new(N_COLUMNS,G_TYPE_INT,G_TYPE_STRING,\
 					G_TYPE_STRING,G_TYPE_STRING);
 

@@ -17,7 +17,7 @@ audacious_get_state()
 		buf[i] = '\0';
 	}
 	stream = popen("audtool --playback-status","r");	
-	fread(buf, sizeof(gchar),sizeof(buf),stream);
+	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
 	if (!g_strcmp0(buf,"playing\n")) {
 		state = PLAYING;
@@ -38,14 +38,14 @@ gboolean
 audacious_get_currsong(gchar** name,gchar** path)
 {
 	FILE *stream;
-	gchar buf[200],**tmp,*fullname;
+	gchar buf[250],**tmp,*fullname;
 	gint i;
 //to do: set 0?another method
-	for (i=0;i<200;i++) {
+	for (i=0;i<250;i++) {
 		buf[i] = '\0';
 	}
 	stream = popen("audtool --current-song-filename","r");	
-	fread(buf, sizeof(gchar),sizeof(buf),stream);
+	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
 	fullname = g_uri_unescape_string(buf,NULL);
 	if (fullname)
@@ -82,7 +82,7 @@ audacious_get_totaltime()
 	}
 
 	stream = popen("audtool --current-song-length-seconds","r");	
-	fread(buf, sizeof(gchar),sizeof(buf),stream);
+	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
 	len = strlen(buf)-1;
 	for (i=0;i<len;i++) {
@@ -109,7 +109,7 @@ audacious_get_currplaytime()
 	}
 
 	stream = popen("audtool --current-song-output-length-seconds","r");	
-	fread(buf, sizeof(gchar),sizeof(buf),stream);
+	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
 	len = strlen(buf)-1;
 	for (i=0;i<len;i++) {

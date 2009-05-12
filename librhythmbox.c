@@ -19,9 +19,9 @@ rhythmbox_get_state()
 	for (i=0;i<50;i++) {
 		buf[i] = '\0';
 	}
-//	stream = popen("dbus-send --session --print-reply --no-start --dest=org.gnome.Rhythmbox /org/gnome/Rhythmbox/Player org.gnome.Rhythmbox.Player.getPlaying 2>/dev/null|tail -n 1|awk \'{print $2}\'","r");	
+
 	stream = popen("rhythmbox-client --print-playing --no-start 2>/dev/null","r");
-	fread(buf, sizeof(gchar),sizeof(buf),stream);
+	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
 	if (!g_strcmp0(buf,"Not playing\n") || !g_strcmp0(buf,"")) {
 		state = STOPPED;
@@ -39,14 +39,14 @@ gboolean
 rhythmbox_get_currsong(gchar** name,gchar** path)
 {
 	FILE *stream;
-	gchar buf[200],**tmp,*fullname;
+	gchar buf[250],**tmp,*fullname;
 	gint i;
 //to do: set 0?another method
-	for (i=0;i<200;i++) {
+	for (i=0;i<250;i++) {
 		buf[i] = '\0';
 	}
 	stream = popen("dbus-send --session --print-reply --dest=org.gnome.Rhythmbox /org/gnome/Rhythmbox/Player org.gnome.Rhythmbox.Player.getPlayingUri 2>/dev/null|tail -n 1|awk '{print $2}'","r");
-	fread(buf, sizeof(gchar),sizeof(buf),stream);
+	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
 	if(!g_strcmp0(buf,"")) {
 		*name = *path = "";
@@ -88,7 +88,7 @@ rhythmbox_get_totaltime()
 //	}
 
 /*	stream = popen("rhythmbox-client --print-playing-format %td","r");	
-	fread(buf, sizeof(gchar),sizeof(buf),stream);
+	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
 	LDEBUG("TOTALTIME:%s\n",buf);
 	if (strlen(buf) <= 1) {
@@ -123,9 +123,8 @@ rhythmbox_get_currplaytime()
 		buf[i] = '\0';
 	}
 
-//	stream = popen("rhythmbox-client --print-playing-format %te","r");	
 	stream = popen("dbus-send --session --print-reply --dest=org.gnome.Rhythmbox /org/gnome/Rhythmbox/Player org.gnome.Rhythmbox.Player.getElapsed 2>/dev/null |tail -n 1|awk \'{print $2}\'","r");	
-	fread(buf, sizeof(gchar),sizeof(buf),stream);
+	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
 	len = strlen(buf)-1;
         for (i=0;i<len;i++) {

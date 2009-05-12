@@ -178,7 +178,8 @@ lget_player_state(sLrcPlugin* lrcPlug)
 gboolean
 lget_music_state(sLrcPlugin* lrcPlug)
 {
-	gchar* currsong,*songpath;
+	gchar *currsong = NULL;
+	gchar *songpath = NULL;
 
 	if (!player.init(&player)) {
 		if (!_init_player())
@@ -196,7 +197,9 @@ lget_music_state(sLrcPlugin* lrcPlug)
 			goto otherinfo;
 		}
 		g_free(currsong);
+		currsong = NULL;
 		g_free(songpath);
+		songpath = NULL;
 	} else {
 		lrcPlug->currsong = currsong;
 		lrcPlug->currsongpath = songpath;
@@ -301,7 +304,7 @@ lget_avalible_lrc_num(struct slrcplugin* lrcPlug,gint* num)
 	cmd = g_strdup_printf("%s \"%s\" \"%s\" %s","./scripts/lrcdownload",lrcPlug->currsongpath,lrcPlug->currsong,"n");
 	stream = popen(cmd,"r");
 	g_free(cmd);
-	fread(buf, sizeof(gchar),sizeof(buf),stream);
+	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
 	if (strlen(buf) > 2) {
 		pclose(stream);
@@ -318,17 +321,17 @@ gboolean
 lget_avalible_lrc_info(struct slrcplugin* lrcPlug, gchar** title, gchar** artist, gchar** album, gint index)
 {
 	FILE *stream;
-	gchar buf[100],*cmd,**info,**temp,**tmp,*str;
+	gchar buf[300],*cmd,**info,**temp,**tmp,*str;
 	gint i;
 
-	for (i=0;i<100;i++) {
+	for (i=0;i<300;i++) {
 		buf[i] = '\0';
 	}
 
 	cmd = g_strdup_printf("%s \"%s\" \"%s\" %d","./scripts/lrcdownload",lrcPlug->currsongpath,lrcPlug->currsong,index);
 	stream = popen(cmd,"r");
 	g_free(cmd);
-	fread(buf, sizeof(gchar),sizeof(buf),stream);
+	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
 //	LDEBUG("buf: %s\n",buf);
 	info = g_strsplit_set(buf, "\r\n", 6); //first time split
