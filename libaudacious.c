@@ -28,6 +28,9 @@ audacious_get_state()
 	} else if (!g_strcmp0(buf,"paused\n")) {
 		state = PAUSED;
 		goto end;
+	} else {
+		state = STOPPED;
+		goto end;
 	}
 end:
 	pclose(stream);
