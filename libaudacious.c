@@ -137,18 +137,21 @@ audacious_set_currplaytime_second(gint time)
 }
 
 gboolean
-audacious_init(sPlayerControl* player)
+audacious_init(void)
 {
 //to do
 //test if player is running,if not ,return FALSE;
 	if (audacious_get_state() == STOPPED)
 		return FALSE;
 
-	player->player_get_state = audacious_get_state;
-	player->player_get_currsong = audacious_get_currsong;
-	player->player_get_totaltime = audacious_get_totaltime;
-	player->player_get_currplaytime = audacious_get_currplaytime;
-	player->player_set_currplaytime_second = audacious_set_currplaytime_second;
-
 	return TRUE;
 }
+
+sPlayerControl audacious_player = {
+	.player_get_state = audacious_get_state,
+	.player_get_currsong = audacious_get_currsong,
+	.player_get_totaltime = audacious_get_totaltime,
+	.player_get_currplaytime = audacious_get_currplaytime,
+	.player_set_currplaytime_second = audacious_set_currplaytime_second,
+	.init = audacious_init,
+};

@@ -12,10 +12,10 @@ typedef struct splayercontrol{
 	gint (*player_get_totaltime)(void);
 	gint (*player_get_currplaytime)(void);
 	gboolean (*player_set_currplaytime_second)(gint time);
-	gboolean (*init)(struct splayercontrol* player);
+	gboolean (*init)(void);
 } sPlayerControl;
 
-gboolean audacious_init(sPlayerControl* player);
-gboolean rhythmbox_init(sPlayerControl* player);
+extern sPlayerControl rhythmbox_player;
+extern sPlayerControl audacious_player;
 
 #endif

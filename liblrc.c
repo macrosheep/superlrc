@@ -23,11 +23,15 @@ static gchar *Charsets[CHARSET_NUM] = {
 enum support_player {
 	AUDACIOUS,
 	RHYTHMBOX,
+	N_PLAYER,
 };
 
-sPlayerControl player = {
-	.init = audacious_init,  //default audacious
+sPlayerControl *supplayer[N_PLAYER] = {
+	&audacious_player,
+	&rhythmbox_player,
 };
+
+sPlayerControl *player = &audacious_player; //default
 
 gint _compare_time(gconstpointer a, gconstpointer b)
 {
@@ -141,22 +145,14 @@ gboolean
 _init_player()
 {
 	gint i;
-	for (i=0; i<=RHYTHMBOX; i++) {
-		switch (i) {
-			case AUDACIOUS:
-				player.init = audacious_init;
-				break;
-			case RHYTHMBOX:
-				player.init = rhythmbox_init;
-				break;
-			default:
-				break;
-		}
-		if (player.init(&player))
+	for (i=0; i<N_PLAYER; i++) {
+		if (supplayer[i]->init()) {
+			player = supplayer[i];
 			break;
+		}
 	}
 
-	if (i > RHYTHMBOX)
+	if (i >= N_PLAYER)
 		return FALSE;
 
 	return TRUE;
@@ -165,14 +161,14 @@ _init_player()
 gboolean
 lget_player_state(sLrcPlugin* lrcPlug)
 {
-	if (!player.init(&player)) {
+	if (!player->init()) {
 		if (!_init_player()) {
 			lrcPlug->playerstate = STOPPED;
 			return FALSE;
 		}
 	}
 
-	lrcPlug->playerstate = player.player_get_state();
+	lrcPlug->playerstate = player->player_get_state();
 	
 	return TRUE;
 }
@@ -183,11 +179,11 @@ lget_music_state(sLrcPlugin* lrcPlug)
 	gchar *currsong = NULL;
 	gchar *songpath = NULL;
 
-	if (!player.init(&player)) {
+	if (!player->init()) {
 		if (!_init_player())
 			return FALSE;
 	}
-	player.player_get_currsong(&currsong,&songpath);
+	player->player_get_currsong(&currsong,&songpath);
 	if (!currsong) {LDEBUG("can't get currsong!\n");return FALSE;}
 	if (lrcPlug->currsong) {
 		if (g_strcmp0(lrcPlug->currsong,currsong)) {
@@ -207,9 +203,9 @@ lget_music_state(sLrcPlugin* lrcPlug)
 		lrcPlug->currsongpath = songpath;
 	}
 otherinfo:
-	lrcPlug->totaltime = player.player_get_totaltime();
+	lrcPlug->totaltime = player->player_get_totaltime();
 	lrcPlug->lastplaytime = lrcPlug->currplaytime;
-	lrcPlug->currplaytime = player.player_get_currplaytime();
+	lrcPlug->currplaytime = player->player_get_currplaytime();
 
 	return TRUE;
 }
@@ -217,12 +213,12 @@ otherinfo:
 gboolean
 lset_play_time(gint time)
 {
-	if (!player.init(&player)) {
+	if (!player->init()) {
 		if (!_init_player())
 			return FALSE;
 	}
 
-	player.player_set_currplaytime_second(time);
+	player->player_set_currplaytime_second(time);
 }
 
 gboolean

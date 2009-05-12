@@ -149,16 +149,19 @@ rhythmbox_set_currplaytime_second(gint time)
 }
 
 gboolean
-rhythmbox_init(sPlayerControl* player)
+rhythmbox_init(void)
 {
 	if (rhythmbox_get_state() == STOPPED)
 		return FALSE;
 
-	player->player_get_state = rhythmbox_get_state;
-	player->player_get_currsong = rhythmbox_get_currsong;
-	player->player_get_totaltime = rhythmbox_get_totaltime;
-	player->player_get_currplaytime = rhythmbox_get_currplaytime;
-	player->player_set_currplaytime_second = rhythmbox_set_currplaytime_second;
-
 	return TRUE;
 }
+
+sPlayerControl rhythmbox_player = {
+	.player_get_state = rhythmbox_get_state,
+	.player_get_currsong = rhythmbox_get_currsong,
+	.player_get_totaltime = rhythmbox_get_totaltime,
+	.player_get_currplaytime = rhythmbox_get_currplaytime,
+	.player_set_currplaytime_second = rhythmbox_set_currplaytime_second,
+	.init = rhythmbox_init,
+};
