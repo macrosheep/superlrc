@@ -1,0 +1,44 @@
+This is a program that displays song lyrics.
+
+INSTALL:
+simply type make,that will generate a executable file "superlrc"
+
+HOW TO USE:
+Double click on the executable file will start the program.Or in the terminal,cd
+into the superlrc dir and type ./superlrc will start the program.
+
+FUCTIONS:
+1 support audacious and rhythmbox music player
+2 automaticly downloads song lyrics
+3 support grab the song lyrics and move it to any sentence you want play
+4 support osd dismode
+5 select song lyric from lyrics
+
+在googlecode建了这个项目：
+http://code.google.com/p/superlrc/
+
+源代码：
+网址：http://github.com/macrosheep/superlrc/tree/master
+
+参与开发：
+
+git clone git://github.com/macrosheep/superlrc.git
+
+获取源代码拷贝，git-format-patch作成patch，具体的使用git开发的教程大家可以google之^_^
+
+目前开发状态：
+目前主要任务是测试并修正bug,下一步计划，添加用户配置选项和skin主题功能，活跃开发中，
+大家可从上面的git地址获取最新的源代码参与开发。
+
+目前功能：
+1 支持audacious,rhythmbox的歌词显示。
+2 支持鼠标拖动歌词并播放。
+3 支持歌词自动下载保存至歌曲所在目录！感谢lrcdis，歌词下载脚本参考的lrcdis的歌词下载！
+4 支持osd显示模式，窗口最小化后将自动以osd模式显示。可以通过gnome-osd-properties来设置osd歌词显示的位置等。（ods模式显示脚本使用的是lrcdis中的osd显示函数，再次感谢lrcdis...）＜如果系统没有装gnome-osd,把 scripts/lrcshow 脚本中的 Dismode=osd 改成 Dismode=notify就可以在系统通知处显示歌词了哦！＞
+5 支持从多个候选歌词中(当前设置为最多5个)双击选择下载需要的歌词。[NEW!5.11更新]目前默认歌词下载服务器设置为BAIDU，因为从BAIDU搜索不会被封，但BAIDU准确率差一点，如果想从SOGOU下载歌词，只需将scripts/lrcdownload中的“SERVER=BAIDU”改为“SERVER=SOGOU”即可。
+
+后续开发：
+1 优化歌词下载功能
+2 支持更多的播放器
+3 优化代码
+4 添加一些用户配置的选项(主题，字体等)
