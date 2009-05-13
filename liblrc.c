@@ -16,8 +16,6 @@
 
 #include "common.h"
 #include "libplayer.h"
-//#include <sys/stat.h>
-//#include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -47,7 +45,7 @@ sPlayerControl *supplayer[N_PLAYER] = {
 
 sPlayerControl *player = &audacious_player; //default
 
-gint _compare_time(gconstpointer a, gconstpointer b)
+static gint _compare_time(gconstpointer a, gconstpointer b)
 {
 	if ((*(sLrcLine **)a)->time < (*(sLrcLine **)b)->time)
 		return -1;
@@ -155,7 +153,7 @@ do_strhandle:
 	return TRUE;
 }
 
-gboolean
+static gboolean
 _init_player()
 {
 	gint i;
@@ -235,7 +233,7 @@ lset_play_time(gint time)
 	player->player_set_currplaytime_second(time);
 }
 
-gboolean
+static gboolean
 _download_lyric(sLrcPlugin* lrcPlug)
 {
 	pid_t child = fork();

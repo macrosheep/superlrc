@@ -32,7 +32,6 @@ GtkWidget *window = NULL;
 GtkWidget *layout = NULL;
 GtkWidget *vbox = NULL;
 GtkWidget *event = NULL;
-//GtkWidget *popupmenu = NULL;
 
 gboolean isgrab = FALSE;
 gboolean isminimized = FALSE;
@@ -40,8 +39,9 @@ gboolean winstatechanged = FALSE;
 gint grabbeginy = 0;
 gint moveoldpixel = 0;
 gchar* lastshowline = NULL;
+gchar* currlabelcolor = "green";
 
-gboolean
+static gboolean
 lrcplugin_init()
 {
 	lrcPlug.lrc = g_slice_new0(sLrcInfo);
@@ -72,7 +72,7 @@ lrcplugin_init()
 	return TRUE;
 }
 
-GtkWidget*
+static GtkWidget*
 creat_label(gchar *str)
 {
 	GtkWidget *label;
@@ -84,7 +84,7 @@ creat_label(gchar *str)
 	return label;
 }
 
-void
+static void
 set_label_size(GtkWidget* label, gpointer data)
 {
 	gint height;
@@ -97,7 +97,7 @@ set_label_size(GtkWidget* label, gpointer data)
 	}
 }
 /*
-gint
+static gint
 get_label_height()
 {
 	GList* labels;
@@ -116,7 +116,7 @@ get_label_height()
 	return 1.2*theight;
 }*/
 
-void
+static void
 creat_lyrcs(gpointer line,gpointer data)
 {
 	GtkWidget *label;
@@ -133,7 +133,27 @@ creat_lyrcs(gpointer line,gpointer data)
 	gtk_box_pack_start((GtkBox*)vbox,label,FALSE,FALSE,0);
 }
 
-gboolean
+static gboolean
+mainwin_show_info(gchar *info)
+{
+	GtkWidget *label;
+
+	if (vbox) {
+		gtk_widget_destroy(vbox);
+		vbox = gtk_vbox_new(TRUE,0);
+	} else
+		vbox = gtk_vbox_new(TRUE,0);
+
+	label = creat_label(info);
+	gtk_box_pack_start((GtkBox*)vbox,label,FALSE,FALSE,0);
+	gtk_container_add(GTK_CONTAINER(event),vbox);
+	gtk_layout_move((GtkLayout*)layout,event,0,(height/2));
+	gtk_container_foreach(GTK_CONTAINER(vbox),set_label_size,"default");
+	gtk_widget_set_size_request(window,DEFAULT_WIDTH,DEFAULT_HEIGHT);
+	gtk_widget_show_all (window);
+}
+
+static gboolean
 creat_lrc_layout()
 {
 	GtkWidget *label;
@@ -145,17 +165,10 @@ creat_lrc_layout()
 		vbox = gtk_vbox_new(TRUE,0);
 
 	if (!lrcPlug.lrc->lyrcs) {
-		label = creat_label("No lrc found!");
-		gtk_box_pack_start((GtkBox*)vbox,label,FALSE,FALSE,0);
-		gtk_container_add(GTK_CONTAINER(event),vbox);
-		gtk_layout_move((GtkLayout*)layout,event,0,(height/2));
-		gtk_container_foreach(GTK_CONTAINER(vbox),set_label_size,"default");
-		gtk_widget_set_size_request(window,DEFAULT_WIDTH,DEFAULT_HEIGHT);
-		gtk_widget_show_all (window);
+		mainwin_show_info("No lrc found!");
 	} else {
 		maxWidth = DEFAULT_WIDTH;
 		g_ptr_array_foreach(lrcPlug.lrc->lyrcs,creat_lyrcs,NULL);
-//		gint labelheight = get_label_height();
 		gtk_container_foreach(GTK_CONTAINER(vbox),set_label_size,&labelheight);
 		gtk_container_add(GTK_CONTAINER(event),vbox);
 		gtk_layout_move((GtkLayout*)layout,event,0,(height/2+35));
@@ -166,7 +179,7 @@ creat_lrc_layout()
 	return TRUE;
 }
 
-gboolean
+static gboolean
 set_curr_label_color(gint n)
 {
 	GList* labels;
@@ -197,11 +210,11 @@ set_curr_label_color(gint n)
 		prevlabel = g_list_previous(labels)->data;
 		gtk_widget_modify_fg(prevlabel,GTK_STATE_NORMAL,NULL);
 	}
-	gdk_color_parse ("green",&color);
+	gdk_color_parse (currlabelcolor,&color);
 	gtk_widget_modify_fg(currlabel,GTK_STATE_NORMAL,&color);
 }
 
-gint
+static gint
 pixel_to_time(gint pixel)
 {
 	gint n,delta,dtime;
@@ -228,7 +241,7 @@ pixel_to_time(gint pixel)
 	return (line->time + dtime);
 }
 
-gint
+static gint
 time_to_pixel(void)
 {
 	gint n,currtime,nexttime;
@@ -267,13 +280,13 @@ time_to_pixel(void)
 			/(nexttime - currtime);
 }
 
-void
+static void
 scroll_layout(gint pixel)
 {
 	gtk_layout_move((GtkLayout*)layout,event,0,(height/2-pixel));
 }
 
-gchar*
+static gchar*
 get_line(void)
 {
 	gint n;
@@ -295,24 +308,23 @@ get_line(void)
 	return line->lyrc;
 }
 
-void
+static void
 player_stoped()
 {
 //	set_curr_label_color(0);
 	scroll_layout(0);
 }
 
-void
+static void
 scroll_lyrcs()
 {
 	gint pixel;
 
-//	labelheight = get_label_height();
 	pixel = time_to_pixel();
 	scroll_layout(pixel);
 }
 
-gboolean
+static gboolean
 set_label_color_pixel(gint pixel,gboolean set)
 {
 	GList* labels;
@@ -327,7 +339,7 @@ set_label_color_pixel(gint pixel,gboolean set)
 		labels = g_list_next(labels);
 	label = labels->data;
 	if (set) {
-		gdk_color_parse ("green",&color);
+		gdk_color_parse (currlabelcolor,&color);
 		gtk_widget_modify_fg(label,GTK_STATE_NORMAL,&color);
 	} else {
 		gtk_widget_modify_fg(label,GTK_STATE_NORMAL,NULL);
@@ -336,7 +348,7 @@ set_label_color_pixel(gint pixel,gboolean set)
 	return TRUE;
 }
 
-gboolean
+static gboolean
 grab_lrc(GtkWidget* vbox, GdkEventButton *event, gpointer data)
 {
 	if (event->button == 3) {
@@ -350,7 +362,7 @@ grab_lrc(GtkWidget* vbox, GdkEventButton *event, gpointer data)
 	grabbeginy = (gint)event->y;
 }
 
-gboolean
+static gboolean
 release_lrc(GtkWidget* vbox, GdkEventButton *event, gpointer data)
 {
 	if (!isgrab || !moveoldpixel) {
@@ -360,7 +372,6 @@ release_lrc(GtkWidget* vbox, GdkEventButton *event, gpointer data)
 		return TRUE;
 	}
 	gint time;
-//	gint labelheight = get_label_height();
 	time = pixel_to_time(moveoldpixel);
 	lrcPlug.set_play_time(time);
 	grabbeginy = 0;
@@ -368,13 +379,12 @@ release_lrc(GtkWidget* vbox, GdkEventButton *event, gpointer data)
 	isgrab = FALSE;
 }
 
-gboolean
+static gboolean
 move_lrc(GtkWidget* vbox, GdkEventButton *event, gpointer data)
 {
 	gint pixel;
 	if (!isgrab)
 		return TRUE;
-//	gint labelheight = get_label_height();
 	gint delta = (gint)(event->y) - grabbeginy;
 	if (delta < -labelheight*lrcPlug.lrc->length || delta > labelheight*lrcPlug.lrc->length)
 		return FALSE;
@@ -388,7 +398,7 @@ move_lrc(GtkWidget* vbox, GdkEventButton *event, gpointer data)
 	scroll_layout(moveoldpixel);
 }
 
-gboolean
+static gboolean
 minimized_lyric_show(gchar* line)
 {
 	pid_t child = fork();
@@ -405,7 +415,7 @@ minimized_lyric_show(gchar* line)
 	return TRUE;
 }
 
-gboolean
+static gboolean
 window_minimized_lyric_show()
 {
 	gchar* line = get_line();
@@ -421,7 +431,7 @@ window_minimized_lyric_show()
 	return TRUE;
 }
 
-gboolean
+static gboolean
 smart_control()
 {
 	if (isgrab) return TRUE;
@@ -465,13 +475,13 @@ smart_control()
 	return TRUE;
 }
 
-gboolean
+static gboolean
 main_quit(GtkWidget* window, GdkEvent *event, gpointer data)
 {
 	gtk_main_quit();
 }
 
-gboolean
+static gboolean
 window_state_handle(GtkWidget* window, GdkEventWindowState *event, gpointer data)
 {
 	switch (event->new_window_state) {
@@ -500,7 +510,7 @@ redownload_lrc(GtkWidget *widget,GdkEvent *event)
 	return TRUE;
 }
 
-gboolean
+static gboolean
 creat_window()
 {
 	GtkWidget *popupmenu = NULL;
@@ -535,8 +545,6 @@ creat_window()
 					GTK_SIGNAL_FUNC(main_quit),NULL);
 	gtk_signal_connect(GTK_OBJECT(window),"window-state-event",\
 					GTK_SIGNAL_FUNC(window_state_handle),NULL);
-//	g_signal_connect_swapped (G_OBJECT(event),"button-press-event",
-//					G_CALLBACK(),G_OBJECT(popupmenu));
 }
 
 int
