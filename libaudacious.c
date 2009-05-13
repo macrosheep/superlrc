@@ -16,7 +16,7 @@ audacious_get_state()
 	for (i=0;i<10;i++) {
 		buf[i] = '\0';
 	}
-	stream = popen("audtool --playback-status","r");	
+	stream = popen("audtool --playback-status 2>/dev/null","r");	
 	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
 	if (!g_strcmp0(buf,"playing\n")) {
