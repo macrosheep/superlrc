@@ -1,5 +1,5 @@
 /*  superlrc
- *  Copyright (C) 2005-2007  Yang Hongyang<burnef@gmail.com>.
+ *  Copyright (C) 2009-2011  Yang Hongyang<burnef@gmail.com>.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
