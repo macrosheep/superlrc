@@ -234,7 +234,7 @@ lset_play_time(gint time)
 }
 
 static gboolean
-_download_lyric(sLrcPlugin* lrcPlug)
+_download_lyric(sLrcPlugin* lrcPlug, gint index)
 {
 	pid_t child = fork();
 	if (child == -1)
@@ -247,7 +247,14 @@ _download_lyric(sLrcPlugin* lrcPlug)
 		char *arg1,*arg2;
 		arg1 = g_strdup_printf("%s",lrcPlug->currsongpath);
 		arg2 = g_strdup_printf("%s",lrcPlug->currsong);
-		execl("./scripts/lrcdownload", "lrcdownload", arg1,arg2, (char * )0);
+		if (index) {
+			char* arg3 = g_strdup_printf("%s","d");
+			char* arg4 = g_strdup_printf("%d",index);
+			execl("./scripts/lrcdownload", "lrcdownload", arg1,arg2,arg3,arg4, (char * )0);
+			g_free(arg3);
+			g_free(arg4);
+		} else
+			execl("./scripts/lrcdownload", "lrcdownload", arg1,arg2, (char * )0);
 		g_free(arg1);
 		g_free(arg2);
 		exit(0);
@@ -264,7 +271,8 @@ _download_lyric(sLrcPlugin* lrcPlug)
 	}
 	if (iCount < 0)
 	{
-		LDEBUG("下载歌词超时！");
+		system("killall lrcdownload");
+		LDEBUG("下载歌词超时！\n");
 		return FALSE;
 	}
 	LDEBUG("下载完毕......\n");
@@ -285,7 +293,7 @@ lget_curr_lrcname(sLrcPlugin* lrcPlug)
 	buf = g_strdup_printf("%s%s",(lrcPlug->currsong),".lrc");
 	lrcPlug->currlrcname = g_build_filename(lrcPlug->currsongpath,buf,NULL);
 	if (!g_file_test(lrcPlug->currlrcname, G_FILE_TEST_EXISTS)) {
-		if (!_download_lyric(lrcPlug)) {
+		if (!_download_lyric(lrcPlug,0)) {
 			g_free(buf);
 			return FALSE;
 		}
@@ -343,17 +351,10 @@ lget_avalible_lrc_info(struct slrcplugin* lrcPlug, gchar** title, gchar** artist
 	g_free(cmd);
 	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
-//	LDEBUG("buf: %s\n",buf);
 	info = g_strsplit_set(buf, "\r\n", 6); //first time split
-/*	if (g_strv_length(info) == 1) {
-		g_strfreev(info);
-		return FALSE;
-	}
-*/
 	temp = info;
 	while (*temp != NULL) {
 		str = *temp;
-//		LDEBUG("str: %s\n",str);
 		if (str[0] == '[') {
 			tmp = g_strsplit_set(str,"[:]",4); //second split
 			if (!g_strcmp0(tmp[1],"ti"))
@@ -377,10 +378,7 @@ lget_avalible_lrc_info(struct slrcplugin* lrcPlug, gchar** title, gchar** artist
 gboolean
 lget_lrc_by_index(struct slrcplugin* lrcPlug,gint index)
 {
-	gchar *cmd;
-	cmd = g_strdup_printf("%s \"%s\" \"%s\" %s %d","./scripts/lrcdownload",lrcPlug->currsongpath,lrcPlug->currsong,"d",index);
-	system(cmd);
-	g_free(cmd);
+	_download_lyric(lrcPlug,index);
 
 	return TRUE;
 }
