@@ -21,12 +21,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 #include "debuglog.h"
-
-typedef enum {
-	PLAYING,
-	PAUSED,
-	STOPPED,
-} PlayerStateEnum;
+#include "libplayer.h"
 
 typedef struct {
 	gint time;

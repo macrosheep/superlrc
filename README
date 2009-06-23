@@ -1,7 +1,9 @@
 This is a program that displays song lyrics.
 
 INSTALL:
-simply type make,that will generate a executable file "superlrc"
+$make liball
+$make
+$make install
 
 HOW TO USE:
 Double click on the executable file will start the program.Or in the terminal,cd

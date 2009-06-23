@@ -1,0 +1,4 @@
+INSTALL:
+$make liball
+$make
+$make install

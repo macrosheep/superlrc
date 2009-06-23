@@ -18,7 +18,13 @@
 #define _LIBPLAYER_H
 
 #include <glib.h>
-#include "common.h"
+
+typedef enum {
+	PLAYING,
+	PAUSED,
+	STOPPED,
+} PlayerStateEnum;
+
 
 typedef struct splayercontrol{
 	PlayerStateEnum (*player_get_state)(void);

@@ -29,10 +29,8 @@ rhythmbox_get_state()
 	gchar buf[50];
 	PlayerStateEnum state;
 	gint i;
-//to do: set 0?another method
-	for (i=0;i<50;i++) {
-		buf[i] = '\0';
-	}
+
+	memset(buf,0,sizeof(buf));
 
 	stream = popen("rhythmbox-client --print-playing --no-start 2>/dev/null","r");
 	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
@@ -55,10 +53,9 @@ rhythmbox_get_currsong(gchar** name,gchar** path)
 	FILE *stream;
 	gchar buf[400],**tmp,*fullname;
 	gint i;
-//to do: set 0?another method
-	for (i=0;i<400;i++) {
-		buf[i] = '\0';
-	}
+
+	memset(buf,0,sizeof(buf));
+
 	stream = popen("dbus-send --session --print-reply --dest=org.gnome.Rhythmbox /org/gnome/Rhythmbox/Player org.gnome.Rhythmbox.Player.getPlayingUri 2>/dev/null|tail -n 1|awk '{print $2}'","r");
 	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
@@ -132,12 +129,10 @@ rhythmbox_get_currplaytime()
 //	gchar **tmp;
 	gint i,len;
 	gint currtime = 0;
-//to do: set 0?another method
-	for (i=0;i<10;i++) {
-		buf[i] = '\0';
-	}
 
-	stream = popen("dbus-send --session --print-reply --dest=org.gnome.Rhythmbox /org/gnome/Rhythmbox/Player org.gnome.Rhythmbox.Player.getElapsed 2>/dev/null |tail -n 1|awk \'{print $2}\'","r");	
+	memset(buf,0,sizeof(buf));
+
+	stream = popen("dbus-send --session --print-reply --dest=org.gnome.Rhythmbox /org/gnome/Rhythmbox/Player org.gnome.Rhythmbox.Player.getElapsed 2>/dev/null |tail -n 1|awk \'{print $2}\'","r");
 	fread(buf, sizeof(gchar),sizeof(buf)-1,stream);
 
 	len = strlen(buf)-1;

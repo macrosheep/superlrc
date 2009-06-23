@@ -15,7 +15,6 @@
  */
 
 #include "common.h"
-#include "libplayer.h"
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -275,7 +274,6 @@ _download_lyric(sLrcPlugin* lrcPlug, gint index)
 		LDEBUG("下载歌词超时！\n");
 		return FALSE;
 	}
-	LDEBUG("下载完毕......\n");
 	return TRUE;
 }
 
@@ -315,9 +313,7 @@ lget_avalible_lrc_num(struct slrcplugin* lrcPlug,gint* num)
 		return FALSE;
 	}
 
-	for (i=0;i<5;i++) {
-		buf[i] = '\0';
-	}
+	memset(buf,0,sizeof(buf));
 
 	cmd = g_strdup_printf("%s \"%s\" \"%s\" %s","./scripts/lrcdownload",lrcPlug->currsongpath,lrcPlug->currsong,"n");
 	stream = popen(cmd,"r");
@@ -342,9 +338,7 @@ lget_avalible_lrc_info(struct slrcplugin* lrcPlug, gchar** title, gchar** artist
 	gchar buf[400],*cmd,**info,**temp,**tmp,*str;
 	gint i;
 
-	for (i=0;i<400;i++) {
-		buf[i] = '\0';
-	}
+	memset(buf,0,sizeof(buf));
 
 	cmd = g_strdup_printf("%s \"%s\" \"%s\" %d","./scripts/lrcdownload",lrcPlug->currsongpath,lrcPlug->currsong,index);
 	stream = popen(cmd,"r");

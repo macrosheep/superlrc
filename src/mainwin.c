@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses>.
  */
 
-#include "liblrc.h"
+#include "lrc.h"
 #include "common.h"
 #include <unistd.h>
 #include <stdlib.h>
@@ -349,7 +349,7 @@ set_label_color_pixel(gint pixel,gboolean set)
 }
 
 static gboolean
-grab_lrc(GtkWidget* vbox, GdkEventButton *event, gpointer data)
+mouse_press_handle(GtkWidget* vbox, GdkEventButton *event, gpointer data)
 {
 	if (event->button == 3) {
 		gtk_menu_popup(GTK_MENU(data),NULL,NULL,NULL,NULL,
@@ -363,7 +363,7 @@ grab_lrc(GtkWidget* vbox, GdkEventButton *event, gpointer data)
 }
 
 static gboolean
-release_lrc(GtkWidget* vbox, GdkEventButton *event, gpointer data)
+mouse_release_handle(GtkWidget* vbox, GdkEventButton *event, gpointer data)
 {
 	if (!isgrab || !moveoldpixel) {
 		grabbeginy = 0;
@@ -380,7 +380,7 @@ release_lrc(GtkWidget* vbox, GdkEventButton *event, gpointer data)
 }
 
 static gboolean
-move_lrc(GtkWidget* vbox, GdkEventButton *event, gpointer data)
+mouse_move_handle(GtkWidget* vbox, GdkEventButton *event, gpointer data)
 {
 	gint pixel;
 	if (!isgrab)
@@ -536,11 +536,11 @@ creat_window()
 	gtk_container_add (GTK_CONTAINER (layout), event);
 
 	gtk_signal_connect(GTK_OBJECT(event),"button-press-event",\
-					GTK_SIGNAL_FUNC(grab_lrc),GTK_OBJECT(popupmenu));
+					GTK_SIGNAL_FUNC(mouse_press_handle),GTK_OBJECT(popupmenu));
 	gtk_signal_connect(GTK_OBJECT(event),"button-release-event",\
-					GTK_SIGNAL_FUNC(release_lrc),NULL);
+					GTK_SIGNAL_FUNC(mouse_release_handle),NULL);
 	gtk_signal_connect(GTK_OBJECT(event),"motion-notify-event",\
-					GTK_SIGNAL_FUNC(move_lrc),NULL);
+					GTK_SIGNAL_FUNC(mouse_move_handle),NULL);
 	gtk_signal_connect(GTK_OBJECT(window),"delete-event",\
 					GTK_SIGNAL_FUNC(main_quit),NULL);
 	gtk_signal_connect(GTK_OBJECT(window),"window-state-event",\
