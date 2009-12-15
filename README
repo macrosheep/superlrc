@@ -7,7 +7,7 @@ $make install
 
 HOW TO USE:
 Double click on the executable file will start the program.Or in the terminal,cd
-into the superlrc dir and type ./superlrc will start the program.
+into the superlrc dir and type ./superlrc.
 
 FUCTIONS:
 1 support audacious and rhythmbox music player
